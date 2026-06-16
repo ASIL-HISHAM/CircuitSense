@@ -6,8 +6,11 @@ from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
 import io, csv, time
 from pathlib import Path
+import logging
 
 from .schemas import WaveformRequest, FaultPrediction, BatchWaveformRequest, HealthResponse
+
+logger = logging.getLogger("uvicorn.error")
 
 app = FastAPI(
     title="CircuitSense API",
@@ -32,12 +35,12 @@ async def load_model():
         from src.inference import CircuitSensePredictor
         base_dir = Path(__file__).resolve().parent.parent
         checkpoint_path = base_dir / "checkpoints" / "best.pt"
-        print(f"Loading model from: {checkpoint_path}")
-        print(f"Checkpoint exists: {checkpoint_path.exists()}")
+        logger.info(f"Loading model from: {checkpoint_path}")
+        logger.info(f"Checkpoint exists: {checkpoint_path.exists()}")
         predictor = CircuitSensePredictor(str(checkpoint_path))
-        print("Model loaded successfully.")
-    except Exception as e:
-        print(f"Model not loaded: {e} — run training first.")
+        logger.info("Model loaded successfully.")
+    except Exception:
+        logger.exception("Model not loaded")
 
 @app.get("/health", response_model=HealthResponse)
 def health():
