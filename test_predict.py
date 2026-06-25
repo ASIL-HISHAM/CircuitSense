@@ -1,4 +1,12 @@
 import numpy as np
+import sys
+
+# Fix unicode encoding on Windows
+if sys.platform == 'win32':
+    import os
+    os.environ['PYTHONIOENCODING'] = 'utf-8'
+    sys.stdout.reconfigure(encoding='utf-8')
+
 from src.data.simulator import generate_waveform, FAULT_CLASSES
 from src.inference.predictor import CircuitSensePredictor
 
@@ -8,5 +16,5 @@ print("\n=== CircuitSense Fault Diagnosis Test ===\n")
 for fault_id, fault_name in FAULT_CLASSES.items():
     waveform = generate_waveform(fault_id)
     result = predictor.predict(waveform)
-    status = "✅" if result["predicted_class"] == fault_id else "❌"
+    status = "[OK]" if result["predicted_class"] == fault_id else "[FAIL]"
     print(f"{status} True: {fault_name:<30} → Predicted: {result['fault_name']:<30} ({result['confidence']*100:.1f}%)")
